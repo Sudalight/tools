@@ -150,7 +150,10 @@ func (f *File) genDecl(node ast.Node) bool {
 		vspec := spec.(*ast.ValueSpec) // Guaranteed to succeed as this is VAR.
 		typ := ""
 		if vspec.Type == nil && len(vspec.Values) > 0 {
-			ce := vspec.Values[0].(*ast.CompositeLit)
+			ce, ok := vspec.Values[0].(*ast.CompositeLit)
+			if !ok {
+				continue
+			}
 
 			id, ok := ce.Type.(*ast.Ident)
 			if !ok {
