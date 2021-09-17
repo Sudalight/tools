@@ -308,7 +308,12 @@ func (t *TFIDF) Save(filename string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, data, 0777)
+	err = ioutil.WriteFile(filename, data, 0777)
+	if err != nil {
+		return err
+	}
+	t.pd.updated = false
+	return nil
 }
 
 func (t *TFIDF) DocCount() int {
