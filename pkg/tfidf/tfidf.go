@@ -110,9 +110,6 @@ func (w *word) docCount() int {
 	if w == nil {
 		return 0
 	}
-	if w == nil {
-		return 0
-	}
 	return len(w.docSet.m)
 }
 
