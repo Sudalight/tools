@@ -64,5 +64,6 @@ func main() {
 
 	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
 
+	log.Println("ready perfectly!")
 	panic(router.Run(":" + *port))
 }

@@ -28,6 +28,7 @@ func NewServer(filename string) (*Server, error) {
 		}
 	}
 
+	log.Println("start loading data from file...")
 	err = s.tfidf.LoadFrom(filename)
 	return s, err
 }
