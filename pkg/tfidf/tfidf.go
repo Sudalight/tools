@@ -298,21 +298,32 @@ func (t *TFIDF) appendWord(s, docID string) {
 }
 
 func (t *TFIDF) Save(filename string) error {
-	defer t.Unlock()
 	t.Lock()
 	if !t.pd.updated {
+		t.Unlock()
 		return nil
 	}
 
-	data, err := json.Marshal(t.pd)
+	pd := persistentData{
+		Docs:  make([]Doc, len(t.pd.Docs)),
+		Words: make([]string, len(t.pd.Words)),
+	}
+	copy(pd.Docs, t.pd.Docs)
+	copy(pd.Words, t.pd.Words)
+	t.pd.updated = false
+
+	t.Unlock()
+
+	data, err := json.Marshal(pd)
 	if err != nil {
 		return err
 	}
+
 	err = ioutil.WriteFile(filename, data, 0777)
 	if err != nil {
 		return err
 	}
-	t.pd.updated = false
+
 	return nil
 }
 

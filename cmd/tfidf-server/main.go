@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -49,6 +50,7 @@ func main() {
 					log.Println(err)
 				} else {
 					log.Println("auto saved successfully!")
+					runtime.GC()
 				}
 			case <-sigterm:
 				err = server.Save(*storeFilename)
