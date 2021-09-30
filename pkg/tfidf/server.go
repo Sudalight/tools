@@ -14,27 +14,37 @@ type Server struct {
 	tfidf *TFIDF
 }
 
-func NewServer(filename string) (*Server, error) {
+func NewServer(pdFilename, fdFilename string) (*Server, error) {
 	s := &Server{
 		tfidf: NewTFIDF(),
 	}
-	_, err := os.Stat(filename)
+	_, err := os.Stat(pdFilename)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, err
 	} else if os.IsNotExist(err) {
-		err = ioutil.WriteFile(filename, []byte("{}"), 0777)
+		err = ioutil.WriteFile(pdFilename, []byte("{}"), 0777)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	_, err = os.Stat(fdFilename)
+	if err != nil && !os.IsNotExist(err) {
+		return nil, err
+	} else if os.IsNotExist(err) {
+		err = ioutil.WriteFile(fdFilename, []byte("{}"), 0777)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	log.Println("start loading data from file...")
-	err = s.tfidf.LoadFrom(filename)
+	err = s.tfidf.LoadFrom(pdFilename, fdFilename)
 	return s, err
 }
 
-func (s *Server) Save(filename string) error {
-	return s.tfidf.Save(filename)
+func (s *Server) Save(pdFilename, fdFilename string) error {
+	return s.tfidf.Save(pdFilename, fdFilename)
 }
 
 func (s *Server) UpsertDocs(ctx *gin.Context) {
@@ -60,4 +70,14 @@ func (s *Server) GetDocVector(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, s.tfidf.GetDocVector(req))
+}
+
+func (s *Server) GetStatistics(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, struct {
+		DocCount  int `json:"doc_count"`
+		WordCount int `json:"word_count"`
+	}{
+		s.tfidf.DocCount(),
+		s.tfidf.WordCount(),
+	})
 }

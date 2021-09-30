@@ -3,6 +3,7 @@ module github.com/Sudalight/tools
 go 1.14
 
 require (
+	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/go-cmp v0.4.1 // indirect

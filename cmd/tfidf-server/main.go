@@ -7,16 +7,19 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"syscall"
 	"time"
 
 	"github.com/Sudalight/tools/pkg/tfidf"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 )
 
 var (
 	storeFilename = flag.String("fn", "tfidf.json", "filename of tfidf persistent data")
-	port          = flag.String("p", "12345", "service port")
+	fdFilename    = flag.String("fdf", "file-descriptor.json", "filename of file descriptor")
+	port          = flag.Int("p", 12345, "service port")
 )
 
 func main() {
@@ -32,12 +35,13 @@ func main() {
 		})
 	})
 
-	server, err := tfidf.NewServer(*storeFilename)
+	server, err := tfidf.NewServer(*storeFilename, *fdFilename)
 	if err != nil {
 		panic(err)
 	}
 	router.POST("/upsert_docs", server.UpsertDocs)
 	router.POST("/get_doc_vector", server.GetDocVector)
+	router.GET("/statistics", server.GetStatistics)
 
 	sigterm := make(chan os.Signal, 1)
 	go func() {
@@ -45,7 +49,7 @@ func main() {
 			timer := time.Tick(time.Minute)
 			select {
 			case <-timer:
-				err = server.Save(*storeFilename)
+				err = server.Save(*storeFilename, *fdFilename)
 				if err != nil {
 					log.Println(err)
 				} else {
@@ -53,7 +57,7 @@ func main() {
 					runtime.GC()
 				}
 			case <-sigterm:
-				err = server.Save(*storeFilename)
+				err = server.Save(*storeFilename, *fdFilename)
 				if err != nil {
 					log.Println(err)
 				} else {
@@ -66,6 +70,7 @@ func main() {
 
 	signal.Notify(sigterm, syscall.SIGINT, syscall.SIGTERM)
 
+	pprof.Register(router)
 	log.Println("ready perfectly!")
-	panic(router.Run(":" + *port))
+	panic(router.Run(":" + strconv.Itoa(*port)))
 }

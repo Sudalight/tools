@@ -117,8 +117,13 @@ type persistentData struct {
 	sync.Mutex
 	updated bool
 
-	Docs  []Doc    `json:"docs"`
-	Words []string `json:"words"`
+	// store in data file descriptor
+	DocCount  int `json:"doc_count,omitempty"`
+	WordCount int `json:"word_count,omitempty"`
+
+	// store in data file
+	Docs  []Doc    `json:"docs,omitempty"`
+	Words []string `json:"words,omitempty"`
 }
 
 func (p *persistentData) appendWord(s string) int {
@@ -129,6 +134,7 @@ func (p *persistentData) appendWord(s string) int {
 	p.Lock()
 	p.Words = append(p.Words, s)
 	p.updated = true
+	p.WordCount = len(p.Words)
 	return len(p.Words) - 1
 }
 
@@ -140,6 +146,7 @@ func (p *persistentData) appendDoc(doc Doc) int {
 	p.Lock()
 	p.Docs = append(p.Docs, doc)
 	p.updated = true
+	p.DocCount = len(p.Docs)
 	return len(p.Docs) - 1
 }
 
@@ -171,7 +178,7 @@ func (s set) members() []string {
 	if s == nil {
 		return nil
 	}
-	members := make([]string, len(s))
+	members := make([]string, 0, len(s))
 	for member := range s {
 		members = append(members, member)
 	}
@@ -241,22 +248,48 @@ func NewTFIDF() *TFIDF {
 	}
 }
 
-func (t *TFIDF) LoadFrom(filename string) error {
+func (t *TFIDF) LoadFrom(pdFilename, fdFilename string) error {
 	defer t.Unlock()
 	t.Lock()
-	data, err := ioutil.ReadFile(filename)
+
+	fdData, err := ioutil.ReadFile(fdFilename)
 	if err != nil {
 		return err
 	}
+	fd := persistentData{}
+	err = json.Unmarshal(fdData, &fd)
+	if err != nil {
+		return err
+	}
+	t.pd.DocCount = fd.DocCount
+	t.pd.WordCount = fd.WordCount
 
-	pd := persistentData{}
+	data, err := ioutil.ReadFile(pdFilename)
+	if err != nil {
+		return err
+	}
+	pd := persistentData{
+		Docs:  make([]Doc, t.pd.DocCount),
+		Words: make([]string, t.pd.WordCount),
+	}
 	err = json.Unmarshal(data, &pd)
 	if err != nil {
 		return err
 	}
 
-	t.pd.Docs = pd.Docs
-	t.pd.Words = pd.Words
+	t.pd.Docs = make([]Doc, len(pd.Docs))
+	t.pd.Words = make([]string, len(pd.Words))
+
+	for i := range pd.Docs {
+		doc := Doc{
+			ID:    pd.Docs[i].ID,
+			Words: make([]string, len(pd.Docs[i].Words)),
+		}
+		copy(doc.Words, pd.Docs[i].Words)
+		t.pd.Docs[i] = doc
+	}
+	copy(t.pd.Words, pd.Words)
+
 	t.initDerivedData()
 	return nil
 }
@@ -297,7 +330,7 @@ func (t *TFIDF) appendWord(s, docID string) {
 	t.wm.setWord(*w)
 }
 
-func (t *TFIDF) Save(filename string) error {
+func (t *TFIDF) Save(pdFilename, fdFilename string) error {
 	t.Lock()
 	if !t.pd.updated {
 		t.Unlock()
@@ -312,6 +345,11 @@ func (t *TFIDF) Save(filename string) error {
 	copy(pd.Words, t.pd.Words)
 	t.pd.updated = false
 
+	fd := persistentData{
+		DocCount:  t.pd.DocCount,
+		WordCount: t.pd.WordCount,
+	}
+
 	t.Unlock()
 
 	data, err := json.Marshal(pd)
@@ -319,7 +357,17 @@ func (t *TFIDF) Save(filename string) error {
 		return err
 	}
 
-	err = ioutil.WriteFile(filename, data, 0777)
+	err = ioutil.WriteFile(pdFilename, data, 0777)
+	if err != nil {
+		return err
+	}
+
+	fdData, err := json.Marshal(fd)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fdFilename, fdData, 0777)
 	if err != nil {
 		return err
 	}
