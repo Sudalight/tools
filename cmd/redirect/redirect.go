@@ -70,7 +70,7 @@ func walkDir(path string, d fs.DirEntry, err error) error {
 
 		g.Write("package %s\n\n", g.pkgs[i].name)
 
-		g.Write("import \"%s\"\n\n", *pkgPrefix+g.pkgs[i].name)
+		g.Write("import \"%s\"\n\n", *pkgPrefix+strings.TrimPrefix(path, *rootDir))
 
 		g.generate(i)
 		// Format the output.
@@ -97,6 +97,7 @@ func (g *Generator) generate(index int) {
 		}
 
 		for j := range file.typeNames {
+			g.Write("// Deprecated, use %s instead.\n", *pkgPrefix)
 			g.Write("type %s = %s.%s\n\n", file.typeNames[j], g.pkgs[index].name, file.typeNames[j])
 		}
 	}
@@ -121,7 +122,6 @@ func (g *Generator) parsePackage(path string) {
 	}
 
 	for i := range pkgs {
-		log.Println(pkgs[i].Errors, pkgs[i].GoFiles)
 		if len(pkgs[i].GoFiles) < 1 {
 			continue
 		}
