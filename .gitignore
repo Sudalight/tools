@@ -1,3 +1,4 @@
 *.tar
 test*
 *.csv
+*.json

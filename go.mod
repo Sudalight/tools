@@ -3,6 +3,7 @@ module github.com/Sudalight/tools
 go 1.14
 
 require (
+	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang/protobuf v1.4.3 // indirect
