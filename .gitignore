@@ -2,3 +2,4 @@
 test*
 *.csv
 *.json
+.so
