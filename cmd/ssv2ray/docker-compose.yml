@@ -1,0 +1,11 @@
+services:
+  shadowsocks-libev:
+    container_name: ssv2ray
+    image: ssv2ray:latest
+    ports:
+      - "8080:8080/tcp"
+      - "8080:8080/udp"
+    restart: always
+    network_mode: host
+    volumes:
+      - /home/light/ssv2ray.json:/tmp/config.json:ro

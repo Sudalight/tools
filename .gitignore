@@ -3,3 +3,4 @@ test*
 *.csv
 *.json
 *.so
+.env
