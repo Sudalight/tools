@@ -66,8 +66,7 @@ COPY --from=golang /go/src/github.com/teddysun/v2ray-plugin/v2ray-plugin /usr/lo
 
 COPY ./config.json /tmp/config.json
 
-# Shadowsocks environment variables
-ENV CONFIG_FILE = /tmp/config.json
+EXPOSE 8080
 
 # Run as nobody
 USER nobody
