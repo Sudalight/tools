@@ -4,3 +4,4 @@ test*
 *.json
 *.so
 .env
+.DS_Store
