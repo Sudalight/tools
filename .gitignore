@@ -1,7 +1,6 @@
 *.tar
 test*
 *.csv
-*.json
 *.so
 .env
 .DS_Store

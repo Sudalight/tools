@@ -1,0 +1,107 @@
+{
+	"Return nil, nil": {
+		"prefix": "rnn",
+		"body": [
+			"return ${1:nil}, ${0:nil}"
+		],
+		"description": "Return nil, nil"
+	},
+	"Return nil": {
+		"prefix": "rn",
+		"body": [
+			"return ${0:nil}"
+		],
+		"description": "Return nil"
+	},
+	"Return res": {
+		"prefix": "rr",
+		"body": [
+			"return ${0:res}"
+		],
+		"description": "Return res"
+	},
+	"Create main func": {
+		"prefix": "fm",
+		"body": [
+			"func main() {\n\t$0\n}"
+		],
+		"description": "Create main func"
+	},
+	"Set log flags": {
+		"prefix": "lsf",
+		"body": [
+			"log.SetFlags(log.Llongfile | log.LstdFlags)"
+		],
+		"description": "Set log flags"
+	},
+	"Error panic": {
+		"prefix": "iep",
+		"body": [
+			"if err != nil {\n\tpanic(err)\n}"
+		],
+		"description": "Error panic"
+	},
+	"Error return": {
+		"prefix": "ier",
+		"body": [
+			"if err != nil {\n\treturn nil, err\n}\n"
+		],
+		"description": "Error return"
+	},
+	"Make slice": {
+		"prefix": "ms",
+		"body": [
+			"make([]${1:type}, ${2:0})"
+		],
+		"description": "Make empty slice"
+	},
+	"Make map": {
+		"prefix": "mm",
+		"body": [
+			"make(map[${1:type}]${2:type})"
+		],
+		"description": "Make empty map"
+	},
+	"Log println": {
+		"prefix": "lp",
+		"body": [
+			"log.Println($0)"
+		],
+		"description": "Log print line"
+	},
+	"Log printf": {
+		"prefix": "lpf",
+		"body": [
+			"log.Printf(\"%+v\", $0)"
+		],
+		"description": "Log print format"
+	},
+	"For i <": {
+		"prefix": "fori",
+		"body": [
+			"for i := 0; i < ${0:count}; i++ {\n\t\n}"
+		],
+		"description": "For i <"
+	},
+	"For i, v range": {
+		"prefix": "foriv",
+		"body": [
+			"for i${0:, v} := range ${1:values} {\n\t\n}"
+		],
+		"description": "For i, v range"
+	},
+	"For _, v range": {
+		"prefix": "forv",
+		"body": [
+			"for _, ${0:v} := range ${1:values} {\n\t\n}"
+		],
+		"description": "For _, v range"
+	},
+	"interface{}": {
+		"prefix": "any",
+		"body": [
+			"interface{}"
+		],
+		"description": "interface"
+	}
+}
